@@ -1,0 +1,5 @@
+future
+genutility>=0.0.50
+jellyfish
+polyleven; python_version>='3'
+python-Levenshtein; python_version<'3'
