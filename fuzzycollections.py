@@ -13,42 +13,88 @@ from future.utils import PY2
 if TYPE_CHECKING:
 	from typing import Callable, List, Iterable, Iterator, Tuple, Optional
 
+class distance_function_class(object):
+
+	__slots__ = ("func", )
+
+	def __init__(self, func):
+		self.func = func
+
+class distance_python_levensthein(distance_function_class):
+
+	def __init__(self):
+		try:
+			from Levenshtein import distance as _distance
+		except ImportError:
+			logging.error("Please pip install python-Levenshtein")
+			raise
+
+		distance_function_class.__init__(self, _distance)
+
+	def get_func(self, max_distance):
+		if max_distance:
+			return self.max_distance
+		else:
+			return self.func
+
+	def max_distance(self, s1, s2, max_distance):
+		return self.func(s1, s2)
+
+
+class distance_polyleven(distance_function_class):
+
+	def __init__(self):
+		try:
+			from polyleven import levenshtein as _distance
+		except ImportError:
+			logging.error("Please pip install polyleven")
+			raise
+
+		distance_function_class.__init__(self, _distance)
+
+	def get_func(self, max_distance):
+		if max_distance:
+			return self.max_distance
+		else:
+			return self.func
+
+	def max_distance(self, s1, s2, max_distance):
+		return self.func(s1, s2, max_distance is not None and max_distance or -1)
+
+
+class distance_jellyfish(distance_function_class):
+
+	def __init__(self):
+		try:
+			from jellyfish import damerau_levenshtein_distance as _distance
+		except ImportError:
+			logging.error("Please pip install jellyfish")
+			raise
+
+		distance_function_class.__init__(self, _distance)
+
+	def get_func(self, max_distance):
+		if max_distance:
+			return self.max_distance
+		else:
+			return self.func
+
+	def max_distance(self, s1, s2, max_distance):
+		return self.func(s1, s2)
+
+
 def get_distance_func(func="levenshtein", max_distance=False):
 	# type: (Union[str, Callable], bool) -> Union[Callable[[str, str], int], Callable[[str, str, int], int]]
 
 	if isinstance(func, str):
 		if func == "levenshtein":
 			if PY2:
-				try:
-					from Levenshtein import distance as _distance
-				except ImportError:
-					logging.error("Please pip install python-Levenshtein")
-					raise
-
-				if max_distance:
-					return lambda s1, s2, max_distance: _distance(s1, s2)
-				else:
-					return _distance
+				return distance_python_levensthein().get_func(max_distance)
 			else:
-				try:
-					from polyleven import levenshtein as _distance
-				except ImportError:
-					logging.error("Please pip install polyleven")
-					raise
-
-				return lambda s1, s2, max_distance=None: _distance(s1, s2, max_distance is not None and max_distance or -1)
+				return distance_polyleven().get_func(max_distance)
 
 		elif func == "damerau":
-			try:
-				from jellyfish import damerau_levenshtein_distance as _distance
-			except ImportError:
-				logging.error("Please pip install jellyfish")
-				raise
-
-			if max_distance:
-				return lambda s1, s2, max_distance: _distance(s1, s2)
-			else:
-				return _distance
+			return distance_jellyfish().get_func(max_distance)
 
 		else:
 			raise ValueError("Invalid distance function name")
