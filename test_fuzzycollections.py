@@ -4,7 +4,7 @@ from itertools import groupby
 from operator import itemgetter
 
 from genutility.test import MyTestCase, parametrize
-from fuzzycollections import LinearCollection, BkCollection
+from fuzzycollections import LinearCollection, BkCollection, SymmetricDeletesCollection
 
 def preprocess(s):
 	return s.replace(" ", "").lower()
@@ -141,6 +141,39 @@ class PPCollectionTest(MyTestCase):
 		truth = [(0, "asd"), (1, "ASDF")]
 		result = self.col2.findsorted("asd", max_distance=None, limit=2)
 		self.assertEqual(truth, result)
+
+class SymmetricDeletesCollectionTest(MyTestCase):
+
+	col = SymmetricDeletesCollection(2)
+	col.extend(["house", "refrigerator", "x"])
+
+	@parametrize(
+		("house", ["house"]),
+		("houe", ["house"]),
+		("hou", ["house"]),
+		("ho", []),
+		("housea", ["house"]),
+		("houseaa", ["house"]),
+		("houseaaa", []),
+		("houea", ["house"]),
+	)
+	def test_find(self, item, truth):
+		result = self.col.find(item)
+		self.assertEqual(truth, result)
+
+	@parametrize(
+		("house", True),
+		("refrigerator", True),
+		("x", True),
+		("", False),
+		("h", False),
+		("hous", False),
+		("efrigerator", False),
+		("housea", False),
+		("refrigeratora", False),
+	)
+	def test_contains(self, item, truth):
+		self.assertEqual(truth, item in self.col)
 
 if __name__ == "__main__":
 	import unittest

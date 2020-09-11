@@ -6,9 +6,12 @@ import logging
 from heapq import nsmallest
 from operator import itemgetter
 from itertools import islice
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from future.utils import PY2
+
+from genutility.iter import no_dupes
 
 if TYPE_CHECKING:
 	from typing import Callable, List, Iterable, Iterator, Tuple, Optional
@@ -140,7 +143,8 @@ class FuzzyCollection(object):
 	def extend(self, items):
 		# type: (Iterable[str], ) -> None
 
-		raise NotImplementedError
+		for item in items:
+			self.append(item)
 
 	def find(self, item, max_distance, limit):
 		# type: (str, Optional[int]) -> List[Tuple[int, str]]
@@ -170,6 +174,11 @@ class LinearCollection(FuzzyCollection):
 			raise RuntimeError()
 
 		self.collection.append(item)
+
+	def remove(self, item):
+		# type: (str, ) -> None
+
+		self.collection.remove(item)
 
 	def extend(self, items):
 		# type: (Iterable[str], ) -> None
@@ -216,8 +225,8 @@ class LinearCollection(FuzzyCollection):
 
 class BkCollection(FuzzyCollection):
 
-	def __init__(self, distance_func):
-		# type: (Callable[[str, str], int], Callable[[str], str]) -> None
+	def __init__(self, distance_func, max_distance=None):
+		# type: (Callable[[str, str], int], Optional[int]) -> None
 
 		from genutility.metrictree import BKTree
 
@@ -243,3 +252,90 @@ class BkCollection(FuzzyCollection):
 		# type: (str, int, Optional[int]) -> List[Tuple[int, str]]
 
 		return limitedsort(self.tree.find(item, max_distance), limit)
+
+""" Possible optimizations: 
+	- keep track of longest word in vocab to exit early when trying to find long words
+"""
+class SymmetricDeletesCollection(FuzzyCollection):
+
+	def __init__(self, max_distance):
+		# type: (int, ) -> None
+
+		self.max_distance = max_distance
+
+		# maps deletes to items
+		self.vocab = defaultdict(set) # type: Dict[str, Set[str]]
+
+	@classmethod
+	def _deletes_it(cls, item, depth):
+		# type: (str, int) -> Iterator[str]
+
+		# This should be improved. Return deletes without duplicates and ordered by delete distance
+
+		yield item
+
+		if depth == 0:
+			return
+
+		for i in range(len(item)):
+			cand = item[:i] + item[i+1:]
+			for c in cls._deletes_it(cand, depth - 1):
+				yield c
+
+	def _deletes(self, item):
+		# type: (str, ) -> Set[str]
+
+		return set(self._deletes_it(item, min(self.max_distance, len(item) - 1)))
+
+	def append(self, item):
+		# type: (str, ) -> bool
+
+		if item in self:
+			return False
+
+		for delete in self._deletes(item):
+			self.vocab[delete].add(item)
+
+		return True
+
+	def __contains__(self, item): # fixme: is this really correct?
+		# type: (str, ) -> bool
+
+		try:
+			return item in self.vocab[item]
+		except KeyError:
+			False
+
+	def remove(self, item):
+		# type: (str, ) -> bool
+
+		if item not in self:
+			return False
+
+		for delete in self._deletes(item):
+			# these should never fail because we determined that the item is in the collection already
+			s = self.vocab[delete]
+			s.remove(item)
+			if not s:
+				self.vocab.pop(delete)
+
+		return True
+
+	def _find(self, item):
+		for delete in self._deletes(item):
+			for candidate in self.vocab.get(delete, ()):
+				yield candidate
+
+	def find(self, item):
+		# type: (str, ) -> Iterator[str]
+
+		return list(no_dupes(self._find(item)))
+
+if __name__ == "__main__":
+	col = SymmetricDeletesCollection(3)
+	col.append("hou")
+	#col.append("refrigerator")
+	#col.extend(["house", "refrigerator"])
+
+	print(col.vocab)
+

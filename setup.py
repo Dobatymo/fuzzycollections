@@ -6,8 +6,8 @@ with open("readme.md", "r", encoding="utf-8") as fr:
 
 extras_require = {
 	"all": [
-		"genutility"
-		"jellyfish"
+		"genutility",
+		"jellyfish",
 		"polyleven; python_version>='3'",
 		"python-Levenshtein; python_version<'3'",
 	],
@@ -16,7 +16,7 @@ extras_require = {
 setup(
 	author="Dobatymo",
 	name="fuzzycollections",
-	version="0.0.1",
+	version="0.0.2",
 	url="https://github.com/Dobatymo/fuzzycollections",
 	description="fuzzy collections",
 	long_description=long_description,
