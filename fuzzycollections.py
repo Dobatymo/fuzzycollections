@@ -167,6 +167,9 @@ class LinearCollection(FuzzyCollection):
 		self.collection = [] # type: List[str]
 		self.mutable = True
 
+	def __len__(self):
+		return len(self.collection)
+
 	def append(self, item):
 		# type: (str, ) -> None
 
@@ -265,6 +268,10 @@ class SymmetricDeletesCollection(FuzzyCollection):
 
 		# maps deletes to items
 		self.vocab = defaultdict(set) # type: Dict[str, Set[str]]
+		self.size = 0
+
+	def __len__(self):
+		return self.size
 
 	@classmethod
 	def _deletes_it(cls, item, depth):
@@ -293,6 +300,8 @@ class SymmetricDeletesCollection(FuzzyCollection):
 		if item in self:
 			return False
 
+		self.size += 1
+
 		for delete in self._deletes(item):
 			self.vocab[delete].add(item)
 
@@ -311,6 +320,8 @@ class SymmetricDeletesCollection(FuzzyCollection):
 
 		if item not in self:
 			return False
+
+		self.size -= 1
 
 		for delete in self._deletes(item):
 			# these should never fail because we determined that the item is in the collection already
