@@ -21,11 +21,15 @@ class distance_function_class(object):
 	__slots__ = ("func", )
 
 	def __init__(self, func):
+		# type: (Callable, ) -> None
+
 		self.func = func
 
 class distance_python_levensthein(distance_function_class):
 
 	def __init__(self):
+		# type: () -> None
+
 		try:
 			from Levenshtein import distance as _distance
 		except ImportError:
@@ -35,18 +39,24 @@ class distance_python_levensthein(distance_function_class):
 		distance_function_class.__init__(self, _distance)
 
 	def get_func(self, max_distance):
+		# type: (bool, ) -> Callable
+
 		if max_distance:
 			return self.max_distance
 		else:
 			return self.func
 
 	def max_distance(self, s1, s2, max_distance):
+		# type: (str, str, int) -> int
+
 		return self.func(s1, s2)
 
 
 class distance_polyleven(distance_function_class):
 
 	def __init__(self):
+		# type: () -> None
+
 		try:
 			from polyleven import levenshtein as _distance
 		except ImportError:
@@ -56,18 +66,24 @@ class distance_polyleven(distance_function_class):
 		distance_function_class.__init__(self, _distance)
 
 	def get_func(self, max_distance):
+		# type: (bool, ) -> Callable
+
 		if max_distance:
 			return self.max_distance
 		else:
 			return self.func
 
 	def max_distance(self, s1, s2, max_distance):
+		# type: (str, str, int) -> int
+
 		return self.func(s1, s2, max_distance is not None and max_distance or -1)
 
 
 class distance_jellyfish(distance_function_class):
 
 	def __init__(self):
+		# type: () -> None
+
 		try:
 			from jellyfish import damerau_levenshtein_distance as _distance
 		except ImportError:
@@ -77,12 +93,16 @@ class distance_jellyfish(distance_function_class):
 		distance_function_class.__init__(self, _distance)
 
 	def get_func(self, max_distance):
+		# type: (bool, ) -> Callable
+
 		if max_distance:
 			return self.max_distance
 		else:
 			return self.func
 
 	def max_distance(self, s1, s2, max_distance):
+		# type: (str, str, int) -> int
+
 		return self.func(s1, s2)
 
 
@@ -147,12 +167,12 @@ class FuzzyCollection(object):
 			self.append(item)
 
 	def find(self, item, max_distance, limit):
-		# type: (str, Optional[int]) -> List[Tuple[int, str]]
+		# type: (str, Optional[int], Optional[int]) -> List[Tuple[int, str]]
 
 		raise NotImplementedError
 
 	def findsorted(self, item, max_distance, limit):
-		# type: (str, Optional[int]) -> List[Tuple[int, str]]
+		# type: (str, Optional[int], Optional[int]) -> List[Tuple[int, str]]
 
 		raise NotImplementedError
 
@@ -168,6 +188,8 @@ class LinearCollection(FuzzyCollection):
 		self.mutable = True
 
 	def __len__(self):
+		# type: () -> int
+
 		return len(self.collection)
 
 	def append(self, item):
@@ -271,6 +293,8 @@ class SymmetricDeletesCollection(FuzzyCollection):
 		self.size = 0
 
 	def __len__(self):
+		# type: () -> int
+
 		return self.size
 
 	@classmethod
@@ -333,12 +357,14 @@ class SymmetricDeletesCollection(FuzzyCollection):
 		return True
 
 	def _find(self, item):
+		# type: (str, ) -> Iterator[str]
+
 		for delete in self._deletes(item):
 			for candidate in self.vocab.get(delete, ()):
 				yield candidate
 
 	def find(self, item):
-		# type: (str, ) -> Iterator[str]
+		# type: (str, ) -> List[str]
 
 		return list(no_dupes(self._find(item)))
 
@@ -349,4 +375,3 @@ if __name__ == "__main__":
 	#col.extend(["house", "refrigerator"])
 
 	print(col.vocab)
-
