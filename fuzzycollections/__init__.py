@@ -1,1 +1,1 @@
-from .fuzzycollections import LinearCollection, BkCollection, SymmetricDeletesCollection
+from .fuzzycollections import BkCollection, LinearCollection, SymmetricDeletesCollection

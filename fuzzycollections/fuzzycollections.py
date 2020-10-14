@@ -1,20 +1,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from builtins import str
+from future.utils import PY2
 
 import logging
-from heapq import nsmallest
-from operator import itemgetter
-from itertools import islice
 from collections import defaultdict
+from heapq import nsmallest
+from itertools import islice
+from operator import itemgetter
 from typing import TYPE_CHECKING
-
-from future.utils import PY2
 
 from genutility.iter import no_dupes
 
 if TYPE_CHECKING:
-	from typing import Callable, List, Iterable, Iterator, Tuple, Optional
+	from typing import Callable, Iterable, Iterator, List, Optional, Tuple
 
 class distance_function_class(object):
 

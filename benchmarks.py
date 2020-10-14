@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-import tracemalloc
-from genutility.time import PrintStatementTime
-from fuzzycollections import LinearCollection, BkCollection, SymmetricDeletesCollection
 
+import tracemalloc
+
+from genutility.time import PrintStatementTime
 from nltk.corpus import words
+
+from fuzzycollections import BkCollection, LinearCollection, SymmetricDeletesCollection
 
 w = words.words()
 

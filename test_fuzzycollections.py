@@ -4,7 +4,9 @@ from itertools import groupby
 from operator import itemgetter
 
 from genutility.test import MyTestCase, parametrize
-from fuzzycollections import LinearCollection, BkCollection, SymmetricDeletesCollection
+
+from fuzzycollections import BkCollection, LinearCollection, SymmetricDeletesCollection
+
 
 def preprocess(s):
 	return s.replace(" ", "").lower()
