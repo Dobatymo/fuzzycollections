@@ -1,19 +1,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from builtins import str
-from future.utils import PY2
-
 import logging
 from collections import defaultdict
 from heapq import nsmallest
 from itertools import islice
 from operator import itemgetter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from genutility.iter import no_dupes
 
 if TYPE_CHECKING:
-	from typing import Callable, Iterable, Iterator, List, Optional, Tuple
+	from typing import Callable, Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
+
+	DistanceFuncT = Callable[[str, str], int]
+	DistanceFuncMaxT = Callable[[str, str, Optional[int]], int]
 
 class distance_function_class(object):
 
@@ -23,33 +23,6 @@ class distance_function_class(object):
 		# type: (Callable, ) -> None
 
 		self.func = func
-
-class distance_python_levensthein(distance_function_class):
-
-	def __init__(self):
-		# type: () -> None
-
-		try:
-			from Levenshtein import distance as _distance
-		except ImportError:
-			logging.error("Please pip install python-Levenshtein")
-			raise
-
-		distance_function_class.__init__(self, _distance)
-
-	def get_func(self, max_distance):
-		# type: (bool, ) -> Callable
-
-		if max_distance:
-			return self.max_distance
-		else:
-			return self.func
-
-	def max_distance(self, s1, s2, max_distance):
-		# type: (str, str, int) -> int
-
-		return self.func(s1, s2)
-
 
 class distance_polyleven(distance_function_class):
 
@@ -72,8 +45,8 @@ class distance_polyleven(distance_function_class):
 		else:
 			return self.func
 
-	def max_distance(self, s1, s2, max_distance):
-		# type: (str, str, int) -> int
+	def max_distance(self, s1, s2, max_distance=None):
+		# type: (str, str, Optional[int]) -> int
 
 		return self.func(s1, s2, max_distance is not None and max_distance or -1)
 
@@ -99,21 +72,18 @@ class distance_jellyfish(distance_function_class):
 		else:
 			return self.func
 
-	def max_distance(self, s1, s2, max_distance):
-		# type: (str, str, int) -> int
+	def max_distance(self, s1, s2, max_distance=None):
+		# type: (str, str, Optional[int]) -> int
 
 		return self.func(s1, s2)
 
 
 def get_distance_func(func="levenshtein", max_distance=False):
-	# type: (Union[str, Callable], bool) -> Union[Callable[[str, str], int], Callable[[str, str, int], int]]
+	# type: (Union[str, DistanceFuncT, DistanceFuncMaxT], bool) -> Union[DistanceFuncT, DistanceFuncMaxT]
 
 	if isinstance(func, str):
 		if func == "levenshtein":
-			if PY2:
-				return distance_python_levensthein().get_func(max_distance)
-			else:
-				return distance_polyleven().get_func(max_distance)
+			return distance_polyleven().get_func(max_distance)
 
 		elif func == "damerau":
 			return distance_jellyfish().get_func(max_distance)
@@ -178,9 +148,9 @@ class FuzzyCollection(object):
 class LinearCollection(FuzzyCollection):
 
 	def __init__(self, distance_func, preprocess_func=None):
-		# type: (Callable[[str, str, int], int], Callable[[str], str]) -> None
+		# type: (Union[str, DistanceFuncMaxT], Callable[[str], str]) -> None
 
-		self.distance_func = get_distance_func(distance_func, max_distance=True)
+		self.distance_func = cast("DistanceFuncMaxT", get_distance_func(distance_func, max_distance=True))
 		self.preprocess_func = get_preprocess_func(preprocess_func)
 
 		self.collection = [] # type: List[str]
@@ -213,7 +183,7 @@ class LinearCollection(FuzzyCollection):
 		self.collection.extend(items)
 
 	def _distances(self, query, max_distance=None):
-		# type: (str, Optional[str]) -> Iterator[Tuple[int, str]]
+		# type: (str, Optional[int]) -> Iterator[Tuple[int, str]]
 
 		query = self.preprocess_func(query)
 
@@ -234,7 +204,7 @@ class LinearCollection(FuzzyCollection):
 
 	@staticmethod
 	def from_view(collection, distance_func, preprocess_func=None):
-		# type: (Collection[str], Callable, Callable) -> LinearCollection
+		# type: (List[str], Union[str, DistanceFuncMaxT], Callable) -> LinearCollection
 
 		""" Returns a LinearCollection which operates on a view of another collection.
 			Preprocess is done each time the collection is queried.
@@ -250,11 +220,11 @@ class LinearCollection(FuzzyCollection):
 class BkCollection(FuzzyCollection):
 
 	def __init__(self, distance_func, max_distance=None):
-		# type: (Callable[[str, str], int], Optional[int]) -> None
+		# type: (Union[str, DistanceFuncT], Optional[int]) -> None
 
 		from genutility.metrictree import BKTree
 
-		distance_func = get_distance_func(distance_func, max_distance=False)
+		distance_func = cast("DistanceFuncT", get_distance_func(distance_func, max_distance=False))
 		self.tree = BKTree(distance_func)
 
 	def append(self, item):
@@ -336,7 +306,7 @@ class SymmetricDeletesCollection(FuzzyCollection):
 		try:
 			return item in self.vocab[item]
 		except KeyError:
-			False
+			return False
 
 	def remove(self, item):
 		# type: (str, ) -> bool
@@ -362,7 +332,7 @@ class SymmetricDeletesCollection(FuzzyCollection):
 			for candidate in self.vocab.get(delete, ()):
 				yield candidate
 
-	def find(self, item):
+	def find(self, item):  # type: ignore[override]
 		# type: (str, ) -> List[str]
 
 		return list(no_dupes(self._find(item)))
