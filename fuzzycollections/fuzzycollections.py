@@ -247,7 +247,7 @@ class BkCollection(FuzzyCollection):
 
 		return limitedsort(self.tree.find(item, max_distance), limit)
 
-""" Possible optimizations: 
+""" Possible optimizations:
 	- keep track of longest word in vocab to exit early when trying to find long words
 """
 class SymmetricDeletesCollection(FuzzyCollection):
