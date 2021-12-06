@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from genutility.bench import MeasureMemory
 from genutility.time import PrintStatementTime
 from nltk.corpus import words
@@ -20,45 +18,49 @@ SymmetricDeletesCollection init took 24.625s
 SymmetricDeletesCollection query took 0.0470000000204891s
 """
 
-def asd_1(num):
-	with PrintStatementTime("LinearCollection init took {delta}s"):
-		with MeasureMemory() as m:
-			a = LinearCollection("levenshtein")
-			a.extend(w)
-		m.print("LinearCollection")
 
-	with PrintStatementTime("LinearCollection query took {delta}"):
-		for i in range(num):
-			res = a.find("horible", 1)
-	assert res == [(1, "horrible")]
+def asd_1(num):
+    with PrintStatementTime("LinearCollection init took {delta}s"):
+        with MeasureMemory() as m:
+            a = LinearCollection("levenshtein")
+            a.extend(w)
+        m.print("LinearCollection")
+
+    with PrintStatementTime("LinearCollection query took {delta}"):
+        for i in range(num):
+            res = a.find("horible", 1)
+    assert res == [(1, "horrible")]
+
 
 def asd_2(num):
-	with PrintStatementTime("BkCollection init took {delta}"):
-		with MeasureMemory() as m:
-			a = BkCollection("levenshtein")
-			a.extend(w)
-		m.print("BkCollection")
+    with PrintStatementTime("BkCollection init took {delta}"):
+        with MeasureMemory() as m:
+            a = BkCollection("levenshtein")
+            a.extend(w)
+        m.print("BkCollection")
 
-	with PrintStatementTime("BkCollection query took {delta}"):
-		for i in range(num):
-			res = a.find("horible", 1)
-	assert res == [(1, "horrible")]
+    with PrintStatementTime("BkCollection query took {delta}"):
+        for i in range(num):
+            res = a.find("horible", 1)
+    assert res == [(1, "horrible")]
+
 
 def asd_3(num):
-	with PrintStatementTime("SymmetricDeletesCollection init took {delta}"):
-		with MeasureMemory() as m:
-			a = SymmetricDeletesCollection(max_distance=1)
-			a.extend(w)
-		m.print("SymmetricDeletesCollection")
+    with PrintStatementTime("SymmetricDeletesCollection init took {delta}"):
+        with MeasureMemory() as m:
+            a = SymmetricDeletesCollection(max_distance=1)
+            a.extend(w)
+        m.print("SymmetricDeletesCollection")
 
-	with PrintStatementTime("SymmetricDeletesCollection query took {delta}"):
-		for i in range(num):
-			res = a.find("horible")
-	assert res == ["horrible"]
+    with PrintStatementTime("SymmetricDeletesCollection query took {delta}"):
+        for i in range(num):
+            res = a.find("horible")
+    assert res == ["horrible"]
+
 
 if __name__ == "__main__":
-	TOTAL = 1000
+    TOTAL = 1000
 
-	asd_1(TOTAL)
-	asd_2(TOTAL)
-	asd_3(TOTAL)
+    asd_1(TOTAL)
+    asd_2(TOTAL)
+    asd_3(TOTAL)
