@@ -9,3 +9,8 @@ line-length = 120
 profile = "black"
 src_paths = ["."]
 line_length = 120
+
+[tool.mypy]
+allow_redefinition = true
+warn_unused_configs = true
+warn_unused_ignores = true

@@ -16,7 +16,6 @@ def sort_after_first(it):
 
 
 class CollectionTest(MyTestCase):
-
     cola1 = LinearCollection.from_view([], "levenshtein")
     cola2 = LinearCollection.from_view(["", "asd", "asd qwe", "ASDF", "ASDF QWE"], "levenshtein")
 
@@ -88,7 +87,6 @@ class CollectionTest(MyTestCase):
 
 
 class PPCollectionTest(MyTestCase):
-
     col1 = LinearCollection.from_view([], "levenshtein", preprocess)
     col2 = LinearCollection.from_view(["", "asd", "asd qwe", "ASDF", "ASDF QWE"], "levenshtein", preprocess)
 
@@ -148,7 +146,6 @@ class PPCollectionTest(MyTestCase):
 
 
 class SymmetricDeletesCollectionTest(MyTestCase):
-
     col = SymmetricDeletesCollection(2)
     col.extend(["house", "refrigerator", "x"])
 
