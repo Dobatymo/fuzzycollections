@@ -1,16 +1,87 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+build-backend = "flit_core.buildapi"
+
+requires = [
+  "flit-core>=3.2,<4",
+]
+
+[project]
+name = "fuzzycollections"
+readme = "readme.md"
+authors = [
+  { name = "Dobatymo", email = "Dobatymo@users.noreply.github.com" },
+]
+requires-python = ">=3.7"
+classifiers = [
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: ISC License (ISCL)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dynamic = [
+  "description",
+  "version",
+]
+dependencies = [
+  "genutility>=0.0.102",
+  "metrictrees",
+]
+
+optional-dependencies.all = [
+  "jellyfish",
+  "polyleven",
+]
+urls.Home = "https://github.com/Dobatymo/fuzzycollections"
 
 [tool.black]
 line-length = 120
 
+[tool.ruff]
+line-length = 120
+
 [tool.isort]
 profile = "black"
-src_paths = ["."]
 line_length = 120
 
 [tool.mypy]
 allow_redefinition = true
 warn_unused_configs = true
 warn_unused_ignores = true
+
+[tool.bandit]
+skips = [
+  "B101",
+]
+
+[tool.liccheck]
+authorized_licenses = [
+  "bsd",
+  "new bsd",
+  "bsd license",
+  "new bsd license",
+  "simplified bsd",
+  "apache",
+  "apache 2.0",
+  "apache software license",
+  "gnu lgpl",
+  "isc license",
+  "isc license (iscl)",
+  "mit",
+  "mit license",
+  "python software foundation",
+  "python software foundation license",
+  "zpl 2.1",
+]
+unauthorized_licenses = [
+  "gpl v3",
+]
+dependencies = true
+optional_dependencies = [
+  "all",
+]

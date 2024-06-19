@@ -1,0 +1,5 @@
+bandit[toml]
+black
+flake8
+isort
+liccheck

@@ -8,59 +8,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: 3.8
     - name: Install dependencies
       run: |
         python -m pip install -U pip wheel
-        pip install -r requirements-dev.txt
-    - name: Security analysis with bandit
-      run: |
-        bandit --recursive .
-    - name: Lint with flake8
-      run: |
-        flake8 .
+        pip install -r requirements-ci.txt
+    - run: python -m black . --check
+    - run: python -m isort . --check-only
+    - run: python -m flake8 .
+    - run: python -m bandit . --recursive -c pyproject.toml
 
   test:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-20.04, macos-13, windows-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install -U pip wheel
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+        pip install .[all]
     - name: Run tests
       run: |
-        python -O test_fuzzycollections.py
+        python -O -m unittest discover -s tests
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v5
       with:
         python-version: 3.8
     - name: Build dists
       run: |
-        pip install wheel
-        python setup.py sdist bdist_wheel
+        pip install -U build wheel
+        python -m build
     - name: Publish a Python distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}

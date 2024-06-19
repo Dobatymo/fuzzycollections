@@ -1,4 +1,0 @@
-genutility>=0.0.65
-jellyfish
-metrictrees
-polyleven

@@ -27,7 +27,7 @@ def asd_1(num):
         m.print("LinearCollection")
 
     with PrintStatementTime("LinearCollection query took {delta}"):
-        for i in range(num):
+        for _i in range(num):
             res = a.find("horible", 1)
     assert res == [(1, "horrible")]
 
@@ -40,7 +40,7 @@ def asd_2(num):
         m.print("BkCollection")
 
     with PrintStatementTime("BkCollection query took {delta}"):
-        for i in range(num):
+        for _i in range(num):
             res = a.find("horible", 1)
     assert res == [(1, "horrible")]
 
@@ -53,7 +53,7 @@ def asd_3(num):
         m.print("SymmetricDeletesCollection")
 
     with PrintStatementTime("SymmetricDeletesCollection query took {delta}"):
-        for i in range(num):
+        for _i in range(num):
             res = a.find("horible")
     assert res == ["horrible"]
 

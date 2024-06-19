@@ -11,7 +11,7 @@ def preprocess(s):
 
 
 def sort_after_first(it):
-    for k, g in groupby(it, key=itemgetter(0)):
+    for _k, g in groupby(it, key=itemgetter(0)):
         yield from sorted(g)
 
 
