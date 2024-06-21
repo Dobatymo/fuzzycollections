@@ -1,4 +1,4 @@
-""" Fuzzy collections """
+"""Fuzzy collections"""
 
 from .fuzzycollections import BkCollection, LinearCollection, SymmetricDeletesCollection
 

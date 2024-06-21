@@ -118,7 +118,7 @@ class FuzzyCollection:
 
 class LinearCollection(FuzzyCollection):
     def __init__(
-        self, distance_func: Union[str, DistanceFuncMaxT], preprocess_func: Callable[[str], str] = None
+        self, distance_func: Union[str, DistanceFuncMaxT], preprocess_func: Optional[Callable[[str], str]] = None
     ) -> None:
         self.distance_func = cast("DistanceFuncMaxT", get_distance_func(distance_func, max_distance=True))
         self.preprocess_func = get_preprocess_func(preprocess_func)
@@ -162,7 +162,7 @@ class LinearCollection(FuzzyCollection):
 
     @staticmethod
     def from_view(
-        collection: List[str], distance_func: Union[str, DistanceFuncMaxT], preprocess_func: Callable = None
+        collection: List[str], distance_func: Union[str, DistanceFuncMaxT], preprocess_func: Optional[Callable] = None
     ) -> "LinearCollection":
         """Returns a LinearCollection which operates on a view of another collection.
         Preprocess is done each time the collection is queried.

@@ -44,6 +44,14 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
+lint.extend-select = [
+  "B",
+  "I",
+]
+lint.ignore = [
+  "B011",
+  "B904",
+]
 
 [tool.isort]
 profile = "black"
@@ -51,6 +59,7 @@ line_length = 120
 
 [tool.mypy]
 allow_redefinition = true
+no_implicit_optional = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
